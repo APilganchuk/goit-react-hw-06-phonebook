@@ -1,35 +1,34 @@
-import { Component } from "react";
-import styles from "./ContactForm.module.css";
+import ProtoTypes from 'prop-types';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import styles from './ContactForm.module.css';
+import { addContact } from '../../redux/contacts-actions';
 
 class ContactForm extends Component {
+  static propTypes = { onSubmit: ProtoTypes.func.isRequired };
   state = {
-    name: "",
-    number: "",
+    name: '',
+    number: '',
   };
 
-  handleInputChange = (e) => {
-    const { name, value } = e.currentTarget;
-    this.setState({ [name]: value });
-  };
-  handleFormSubmit = (e) => {
-    e.preventDefault();
-
-    this.props.onSubmit(this.state);
-
-    this.reset();
+  handleChange = event => {
+    const typeOfInput = event.currentTarget.name;
+    const input = event.currentTarget.value;
+    this.setState({ [typeOfInput]: input });
   };
 
-  reset = () => {
-    this.setState({
-      name: "",
-      number: "",
-    });
+  handleSubmit = event => {
+    event.preventDefault();
+    const { name, number } = this.state;
+    this.props.onSubmit(name, number);
+    this.setState({ name: '', number: '' });
   };
 
   render() {
+    const { name, number } = this.state;
     return (
-      <form className={styles.form} onSubmit={this.handleFormSubmit}>
-        <label>
+      <form className={styles.form} onSubmit={this.handleSubmit}>
+        <label className={styles.form__label}>
           Name
           <input
             type="text"
@@ -37,8 +36,8 @@ class ContactForm extends Component {
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
             required
-            value={this.state.name}
-            onChange={this.handleInputChange}
+            value={name}
+            onChange={this.handleChange}
           />
         </label>
         <label>
@@ -49,13 +48,18 @@ class ContactForm extends Component {
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
             title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
             required
-            value={this.state.number}
-            onChange={this.handleInputChange}
+            value={number}
+            onChange={this.handleChange}
           />
         </label>
+
         <button type="submit">Add contact</button>
       </form>
     );
   }
 }
-export default ContactForm;
+const mapDispatchToProps = dispatch => ({
+  onSubmit: (name, number) => dispatch(addContact(name, number)),
+});
+
+export default connect(null, mapDispatchToProps)(ContactForm);

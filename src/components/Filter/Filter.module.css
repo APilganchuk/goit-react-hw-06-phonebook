@@ -1,4 +1,9 @@
-.input {
+.filter__label {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.filter__input {
   display: block;
   margin-top: 10px;
 }

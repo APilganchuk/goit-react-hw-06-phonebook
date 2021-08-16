@@ -1,81 +1,77 @@
-import { Component } from "react";
-import "./App.css";
-import { v4 as uuidv4 } from "uuid";
-import ContactForm from "./components/ContactForm";
-import Filter from "./components/Filter";
-import ContactList from "./components/ContactList";
+import { React, Component } from 'react';
+// import shortid from 'shortid';
+//Components
+import ContactForm from './components/ContactForm';
+import ContactList from './components/ContactList';
+import Filter from './components/Filter';
+import './App.css';
 
 class App extends Component {
-  
   state = {
     contacts: [],
-    filter: "",
-  };
-  componentDidMount() {
-    const contacts = localStorage.getItem("contacts");
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    }
-  }
-  addContact = ({ name, number }) => {
-    const newContacts = {
-      id: uuidv4(),
-      name: name,
-      number: number,
-    };
-    const currentContacts = this.state.contacts.map((contact) => contact.name);
-
-    if (currentContacts.includes(newContacts.name)) {
-      alert(`${newContacts.name} is alredy in contacts!`);
-    } else {
-      this.setState((prevState) => ({
-        contacts: [...prevState.contacts, newContacts],
-      }));
-    }
+    filter: '',
   };
 
-  deleteContact = (contactId) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter(
-        (contact) => contact.id !== contactId
-      ),
+  // componentDidMount() {
+  //   const contacts = localStorage.getItem('contacts');
+  //   const parsedContacts = JSON.parse(contacts);
+  //   if (parsedContacts) {
+  //     this.setState({ contacts: parsedContacts });
+  //   }
+  // }
+
+  // componentDidUpdate(prevProps, prevState) {
+  //   const prevContacts = prevState.contacts;
+  //   const nextContacts = this.state.contacts;
+  //   if (prevContacts !== nextContacts) {
+  //     localStorage.setItem('contacts', JSON.stringify(nextContacts));
+  //   }
+  // }
+
+  // addContact = (nameForAdd, numberForAdd) => {
+  //   const isExistContact = this.state.contacts.find(
+  //     ({ name }) => name === nameForAdd,
+  //   );
+  //   if (isExistContact) {
+  //     alert(`${nameForAdd} is already in contacts`);
+  //     return;
+  //   }
+  //   const contact = {
+  //     id: shortid.generate(),
+  //     name: nameForAdd,
+  //     number: numberForAdd,
+  //   };
+  //   this.setState(({ contacts }) => ({ contacts: [contact, ...contacts] }));
+  // };
+
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(({ id }) => id !== contactId),
     }));
   };
 
-  filterContactsHandler = (e) => {
-    this.setState({ filter: e.currentTarget.value });
+  changeFilter = event => {
+    this.setState({ filter: event.currentTarget.value });
   };
 
-  getFilteredContacts = () => {
+  getVisibleContacts = () => {
     const { filter, contacts } = this.state;
-
-    const normalizedFilter = filter.toLowerCase();
-    return contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(normalizedFilter)
+    const normalizedFilter = filter.toLocaleLowerCase();
+    return contacts.filter(({ name }) =>
+      name.toLocaleLowerCase().includes(normalizedFilter),
     );
   };
 
   render() {
-    const filteredContacts = this.getFilteredContacts();
+    const visibleContacts = this.getVisibleContacts();
+    const { filter } = this.state;
     return (
       <div className="Wrapper">
         <h1>Phonebook</h1>
-        <ContactForm onSubmit={this.addContact} />
-        <h2>Contacts:</h2>
-        <Filter
-          onChange={this.filterContactsHandler}
-          value={this.state.filter}
-        />
-        <ContactList
-          contactList={filteredContacts}
-          onDeleteContact={this.deleteContact}
-        />
+        <ContactForm />
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.changeFilter} />
+        <ContactList contacts={visibleContacts} onDelete={this.deleteContact} />
       </div>
     );
   }
